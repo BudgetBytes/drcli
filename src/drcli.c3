@@ -96,25 +96,19 @@ fn bool Drcli.validate(self) {
     foreach (pf : self.programFlags) {
         UserFlag! uf = self.userFlags.getByFlag(pf.flag);
         
-        if (pf.required) {
-            if (catch err = uf) {
+        if (catch err = uf) {
+            if (pf.required) {
                 io::eprintfn("ERROR: Flag %s is required, but was not provided.", pf.flag);
                 self.usage();
                 return false;
-            }
+            } 
+            continue;
         }
-        if (pf.hasArgs) {
-            if (catch err = uf) {
-                io::eprintfn("ERROR: Flag %s requires values, but flag was not provided.", pf.flag);
-                self.usage();
-                return false;
-            }
 
-            if (uf.flagValues.len() == 0) {
-                io::eprintfn("ERROR: Flag %s requires values, but none was provided.", pf.flag);
-                self.usage();
-                return false;
-            }
+        if (pf.hasArgs && uf.flagValues.len() == 0) {
+            io::eprintfn("ERROR: Flag %s requires values, but flag was not provided.", pf.flag);
+            self.usage();
+            return false;
         }
     }
 
