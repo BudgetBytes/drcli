@@ -11,7 +11,6 @@ fault ClidreiError {
 struct ProgramFlag {
 	String flag;
 	String description;
-	String example;
 	bool required;
 	bool hasArgs;
 }
@@ -86,21 +85,36 @@ fn bool Clidrei.validate(self) {
 		if (pf.required) {
             if (catch err = uf) {
 				io::eprintfn("ERROR: Flag %s is required, but was not provided.", pf.flag);
+                self.usage();
 				return false;
 		    }
 		}
         if (pf.hasArgs) {
             if (catch err = uf) {
 				io::eprintfn("ERROR: Flag %s requires values, but flag was not provided.", pf.flag);
+                self.usage();
 				return false;
 		    }
 
             if (uf.flagValues.len() == 0) {
                 io::eprintfn("ERROR: Flag %s requires values, but none was provided.", pf.flag);
+                self.usage();
 				return false;
             }
 		}
 	}
 
 	return true;
+}
+
+fn void Clidrei.usage(self) {
+    io::printn();
+    io::printfn("USAGE: %s [OPTION] [VALUE]", self.program);
+    io::printn("OPTIONS:");
+    foreach(pf : self.programFlags) {
+        io::printf("  %-3s  %-25s", pf.flag, pf.description);
+        io::printf("  Required: %-20s Requires values: %s", pf.required ? "True" : "False", pf.hasArgs ? "True" : "False");
+        io::printn();
+    }
+    io::printn();
 }
