@@ -1,5 +1,5 @@
 module main;
-import clidrei;
+import drcli;
 import std::io;
 import std::collections::list;
 
@@ -12,5 +12,5 @@ fn void! main(String[] args) {
     flags.push(verbose);
     flags.push(paths);
 
-    Clidrei cli = clidrei::new(flags, args)!;
+    Drcli cli = drcli::new(flags, args)!;
 }

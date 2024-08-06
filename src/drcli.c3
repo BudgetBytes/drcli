@@ -1,4 +1,4 @@
-module clidrei;
+module drcli;
 import std::io;
 import std::collections::list;
 
@@ -34,13 +34,13 @@ fn UserFlag! List(<UserFlag>).contains(self, String flag) {
     return ClidreiError.FLAG_NOT_FOUND?;
 }
 
-struct Clidrei {
+struct Drcli {
     String program;
     List(<ProgramFlag>) programFlags;
     List(<UserFlag>) userFlags;
 }
 
-fn Clidrei! new(List(<ProgramFlag>) programFlags, String[] args) {
+fn Drcli! new(List(<ProgramFlag>) programFlags, String[] args) {
     if (programFlags.len() == 0) return ClidreiError.NOT_INITALIZED?;
 
     String program = args[0];
@@ -67,7 +67,7 @@ fn Clidrei! new(List(<ProgramFlag>) programFlags, String[] args) {
     
     }
 
-    Clidrei cli = {
+    Drcli cli = {
         program,
         programFlags,
         userFlags
@@ -78,7 +78,7 @@ fn Clidrei! new(List(<ProgramFlag>) programFlags, String[] args) {
     return cli;
 }
 
-fn bool Clidrei.validate(self) {
+fn bool Drcli.validate(self) {
     foreach (pf : self.programFlags) {
         UserFlag! uf = self.userFlags.contains(pf.flag);
         
@@ -107,7 +107,7 @@ fn bool Clidrei.validate(self) {
     return true;
 }
 
-fn void Clidrei.usage(self) {
+fn void Drcli.usage(self) {
     io::printn();
     io::printfn("USAGE: %s [OPTION] [VALUE]", self.program);
     io::printn("OPTIONS:");
