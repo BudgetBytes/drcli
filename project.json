@@ -1,0 +1,17 @@
+{
+  "langrev": "1",
+  "warnings": [ "no-unused" ],
+  "dependency-search-paths": [ "lib" ],
+  "dependencies": [ ],
+  "authors": [ "Pierpaolo Feltrin" ],
+  "version": "0.1.0",
+  "sources": [ "src/**" ],
+  "output": "build",
+  "targets": {
+    "clidrei": {
+      "type": "executable"
+    }
+  },
+  "cpu": "generic",
+  "opt": "O0"
+}
