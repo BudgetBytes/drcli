@@ -15,7 +15,14 @@ struct ProgramFlag {
     bool hasArgs;
 }
 
-fn ProgramFlag! List(<ProgramFlag>).contains(self, String flag) {
+fn bool List(<ProgramFlag>).contains(self, String flag) {
+    foreach(f : self) {
+        if (f.flag == flag) return true;
+    }
+    return false;
+}
+
+fn ProgramFlag! List(<ProgramFlag>).getByFlag(self, String flag) {
     foreach(f : self) {
         if (f.flag == flag) return f;
     }
@@ -27,7 +34,14 @@ struct UserFlag {
     List(<String>) flagValues;
 }
 
-fn UserFlag! List(<UserFlag>).contains(self, String flag) {
+fn bool List(<UserFlag>).contains(self, String flag) {
+    foreach(f : self) {
+        if (f.programFlag.flag == flag) return true;
+    }
+    return false;
+}
+
+fn UserFlag! List(<UserFlag>).getByFlag(self, String flag) {
     foreach(f : self) {
         if (f.programFlag.flag == flag) return f;
     }
@@ -49,7 +63,7 @@ fn Drcli! new(List(<ProgramFlag>) programFlags, String[] args) {
     for (int i = 1; i < args.len; ++i) {
         String arg = args[i];
 
-        ProgramFlag! programFlag = programFlags.contains(arg);
+        ProgramFlag! programFlag = programFlags.getByFlag(arg);
         if (catch err = programFlag) {
             io::printfn("ERROR: Undefined flag: %s", arg);
             continue;
@@ -80,7 +94,7 @@ fn Drcli! new(List(<ProgramFlag>) programFlags, String[] args) {
 
 fn bool Drcli.validate(self) {
     foreach (pf : self.programFlags) {
-        UserFlag! uf = self.userFlags.contains(pf.flag);
+        UserFlag! uf = self.userFlags.getByFlag(pf.flag);
         
         if (pf.required) {
             if (catch err = uf) {
