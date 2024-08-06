@@ -81,16 +81,24 @@ fn Clidrei! new(List(<ProgramFlag>) programFlags, String[] args) {
 
 fn bool Clidrei.validate(self) {
 	foreach (pf : self.programFlags) {
+        UserFlag! uf = self.userFlags.contains(pf.flag);
+		
 		if (pf.required) {
-			UserFlag! uf = self.userFlags.contains(pf.flag);
-			if (catch err = uf) {
+            if (catch err = uf) {
 				io::eprintfn("ERROR: Flag %s is required, but was not provided.", pf.flag);
 				return false;
-			}
-			if (pf.hasArgs && uf.flagValues.len() == 0) {
-				io::eprintfn("ERROR: Flag %s requires values, but none was provided.", pf.flag);
+		    }
+		}
+        if (pf.hasArgs) {
+            if (catch err = uf) {
+				io::eprintfn("ERROR: Flag %s requires values, but flag was not provided.", pf.flag);
 				return false;
-			}
+		    }
+
+            if (uf.flagValues.len() == 0) {
+                io::eprintfn("ERROR: Flag %s requires values, but none was provided.", pf.flag);
+				return false;
+            }
 		}
 	}
 

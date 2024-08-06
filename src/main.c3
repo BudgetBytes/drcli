@@ -6,7 +6,7 @@ import std::collections::list;
 fn void main(String[] args) {
 
 	List(<ProgramFlag>) flags;
-	ProgramFlag verbose = {"-v", "Print verbose", "-v", false, false};
+	ProgramFlag verbose = {"-v", "Print verbose", "-v", true, false};
 	ProgramFlag paths = {"-p", "Path list", "-p file1.txt file2.txt", true, true};
 
 	flags.push(verbose);
