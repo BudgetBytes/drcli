@@ -31,7 +31,7 @@ fn ProgramFlag! List(<ProgramFlag>).getByFlag(self, String flag) {
 
 struct UserFlag {
     ProgramFlag programFlag;
-    List(<String>) flagValues;
+    List(<String>) values;
 }
 
 fn bool List(<UserFlag>).contains(self, String flag) {
@@ -75,7 +75,7 @@ fn Drcli! new(List(<ProgramFlag>) programFlags, String[] args) {
         };
 
         for (int j = i + 1; j < args.len && !args[j].starts_with("-"); i = j, ++j) {
-            userFlag.flagValues.push(args[j]);
+            userFlag.values.push(args[j]);
         }
         userFlags.push(userFlag);
     
@@ -105,7 +105,7 @@ fn bool Drcli.validate(self) {
             continue;
         }
 
-        if (pf.hasArgs && uf.flagValues.len() == 0) {
+        if (pf.hasArgs && uf.values.len() == 0) {
             io::eprintfn("ERROR: Flag %s requires values, but flag was not provided.", pf.flag);
             self.usage();
             return false;
