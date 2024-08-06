@@ -120,8 +120,7 @@ fn void Drcli.usage(self) {
     io::printfn("USAGE: %s [OPTION] [VALUE]", self.program);
     io::printn("OPTIONS:");
     foreach(pf : self.programFlags) {
-        io::printf("  %-3s  %-25s", pf.flag, pf.description);
-        io::printf("  Required: %-20s Requires values: %s", pf.required ? "True" : "False", pf.hasArgs ? "True" : "False");
+        io::printf("  %-10s  %s", pf.flag, pf.description);
         io::printn();
     }
     io::printn();
