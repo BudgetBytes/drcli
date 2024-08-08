@@ -8,69 +8,70 @@ fault ClidreiError {
     VALIDATION
 }
 
-struct ProgramFlag {
-    String flag;
+struct Flag {
+    String identifier;
     String description;
     bool required;
     bool hasArgs;
 }
 
-fn bool List(<ProgramFlag>).contains(self, String flag) {
-    foreach(f : self) {
-        if (f.flag == flag) return true;
-    }
-    return false;
-}
-
-fn ProgramFlag! List(<ProgramFlag>).getByFlag(self, String flag) {
-    foreach(f : self) {
-        if (f.flag == flag) return f;
-    }
-    return ClidreiError.FLAG_NOT_FOUND?;
-}
-
-struct UserFlag {
-    ProgramFlag programFlag;
+struct Flags {
+    Flag flag;
     List(<String>) values;
-}
-
-fn bool List(<UserFlag>).contains(self, String flag) {
-    foreach(f : self) {
-        if (f.programFlag.flag == flag) return true;
-    }
-    return false;
-}
-
-fn UserFlag! List(<UserFlag>).getByFlag(self, String flag) {
-    foreach(f : self) {
-        if (f.programFlag.flag == flag) return f;
-    }
-    return ClidreiError.FLAG_NOT_FOUND?;
 }
 
 struct Drcli {
     String program;
-    List(<ProgramFlag>) programFlags;
-    List(<UserFlag>) userFlags;
+    List(<Flags>) flags;
 }
 
-fn Drcli! new(List(<ProgramFlag>) programFlags, String[] args) {
-    if (programFlags.len() == 0) return ClidreiError.NOT_INITALIZED?;
+fn bool List(<Flag>).contains(self, String identifier) {
+    foreach(f : self) {
+        if (f.identifier == identifier) return true;
+    }
+    return false;
+}
+
+fn Flag! List(<Flag>).getById(self, String identifier) {
+    foreach(f : self) {
+        if (f.identifier == identifier) return f;
+    }
+    return ClidreiError.FLAG_NOT_FOUND?;
+}
+
+
+fn bool List(<Flags>).contains(self, String identifier) {
+    foreach(f : self) {
+        if (f.flag.identifier == identifier) return true;
+    }
+    return false;
+}
+
+fn Flags! List(<Flags>).getById(self, String identifier) {
+    foreach(f : self) {
+        if (f.flag.identifier == identifier) return f;
+    }
+    return ClidreiError.FLAG_NOT_FOUND?;
+}
+
+
+fn Drcli! new(List(<Flag>) defaultFlags, String[] args) {
+    if (defaultFlags.len() == 0) return ClidreiError.NOT_INITALIZED?;
 
     String program = args[0];
-    List(<UserFlag>) userFlags;
+    List(<Flags>) userFlags;
 
     for (int i = 1; i < args.len; ++i) {
         String arg = args[i];
 
-        ProgramFlag! programFlag = programFlags.getByFlag(arg);
-        if (catch err = programFlag) {
-            io::printfn("ERROR: Undefined flag: %s", arg);
+        Flag! flag = defaultFlags.getById(arg);
+        if (catch err = flag) {
+            io::printfn("ERROR: Unknown flag: %s", arg);
             continue;
         }
 
-        UserFlag userFlag = {
-            programFlag,
+        Flags userFlag = {
+            flag,
             {}
         };
 
@@ -83,31 +84,30 @@ fn Drcli! new(List(<ProgramFlag>) programFlags, String[] args) {
 
     Drcli cli = {
         program,
-        programFlags,
         userFlags
     };
 
-    if (!cli.validate()) return ClidreiError.VALIDATION?;
+    if (!cli.validate(defaultFlags)) return ClidreiError.VALIDATION?;
 
     return cli;
 }
 
-fn bool Drcli.validate(self) {
-    foreach (pf : self.programFlags) {
-        UserFlag! uf = self.userFlags.getByFlag(pf.flag);
+fn bool Drcli.validate(self, List(<Flag>) defaultFlags) {
+    foreach (f : defaultFlags) {
+        Flags! uf = self.flags.getById(f.identifier);
         
         if (catch err = uf) {
-            if (pf.required) {
-                io::eprintfn("ERROR: Flag %s is required, but was not provided.", pf.flag);
-                self.usage();
+            if (f.required) {
+                io::eprintfn("ERROR: Flag %s is required.", f.identifier);
+                self.usage(defaultFlags);
                 return false;
             } 
             continue;
         }
 
-        if (pf.hasArgs && uf.values.len() == 0) {
-            io::eprintfn("ERROR: Flag %s requires values, but flag was not provided.", pf.flag);
-            self.usage();
+        if (f.hasArgs && uf.values.len() == 0) {
+            io::eprintfn("ERROR: Flag %s requires arguments.", f.identifier);
+            self.usage(defaultFlags);
             return false;
         }
     }
@@ -115,12 +115,12 @@ fn bool Drcli.validate(self) {
     return true;
 }
 
-fn void Drcli.usage(self) {
+fn void Drcli.usage(self, List(<Flag>) defaultFlags) {
     io::printn();
     io::printfn("USAGE: %s [OPTION] [VALUE]", self.program);
     io::printn("OPTIONS:");
-    foreach(pf : self.programFlags) {
-        io::printf("  %-10s  %s", pf.flag, pf.description);
+    foreach(f : defaultFlags) {
+        io::printf("  %-10s  %s", f.identifier, f.description);
         io::printn();
     }
     io::printn();
